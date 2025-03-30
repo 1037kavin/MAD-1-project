@@ -713,7 +713,7 @@ def delete_quiz(quiz_id):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({'success': True})
     flash('Quiz deleted successfully')
-    return redirect(url_for('subject_management', subject_id=chapter_id))
+    return redirect(url_for('chapter_management', chapter_id=chapter_id))
 
 @app.route('/admin/chapter/<int:chapter_id>/delete', methods=['POST'])
 @login_required
