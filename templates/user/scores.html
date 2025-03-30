@@ -50,27 +50,21 @@
         
         <div class="row mb-4">
             <div class="col-md-4">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">Average Score</h5>
-                        <p class="card-text display-4">{{ "%.1f"|format(avg_score) }}%</p>
-                    </div>
+                <div class="stats-card">
+                    <h5 class="card-title">Average Score</h5>
+                    <div class="stats-number">{{ "%.1f"|format(avg_score) }}%</div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Quizzes Taken</h5>
-                        <p class="card-text display-4">{{ scores|length }}</p>
-                    </div>
+                <div class="stats-card">
+                    <h5 class="card-title">Total Quizzes Taken</h5>
+                    <div class="stats-number">{{ scores|length }}</div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">Best Score</h5>
-                        <p class="card-text display-4">{{ "%.1f"|format(best_score) }}%</p>
-                    </div>
+                <div class="stats-card">
+                    <h5 class="card-title">Best Score</h5>
+                    <div class="stats-number">{{ "%.1f"|format(best_score) }}%</div>
                 </div>
             </div>
         </div>
