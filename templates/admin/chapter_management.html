@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter Management - Quiz Master</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">Quiz Master</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('user_dashboard') }}">Dashboard</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Chapter Management - {{ chapter.name }}</h2>
+        <p class="text-muted">Subject: {{ chapter.subject.name }}</p>
+
+        <!-- Search Bar -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search quizzes by date or remarks...">
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>{{ chapter.name }}</h2>
+            <div>
+                <a href="{{ url_for('add_quiz', chapter_id=chapter.id) }}" class="btn btn-success me-2">
+                    <i class="fas fa-plus"></i> Add Quiz
+                </a>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Chapter Details</h5>
+                <p class="card-text">{{ chapter.description }}</p>
+                <div class="mt-3">
+                    <a href="{{ url_for('edit_chapter', chapter_id=chapter.id) }}" class="btn btn-primary me-2">
+                        <i class="fas fa-edit"></i> Edit Chapter
+                    </a>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteChapterModal">
+                        <i class="fas fa-trash"></i> Delete Chapter
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Quizzes</h3>
+                <a href="{{ url_for('add_quiz', chapter_id=chapter.id) }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add Quiz
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Duration</th>
+                                <th>Questions</th>
+                                <th>Remarks</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="searchable">
+                            {% for quiz in chapter.quizzes %}
+                                <tr>
+                                    <td>{{ quiz.date_of_quiz.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ quiz.time_duration }}</td>
+                                    <td>{{ quiz.questions|length }}</td>
+                                    <td>{{ quiz.remarks }}</td>
+                                    <td>
+                                        <a href="{{ url_for('edit_quiz', quiz_id=quiz.id) }}" class="btn btn-sm btn-primary me-2">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="handleQuizDelete({{ quiz.id }})">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Chapter Modal -->
+    <div class="modal fade" id="deleteChapterModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Chapter</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this chapter? This action cannot be undone.</p>
+                    <p class="text-danger"><strong>Warning:</strong> All quizzes and questions associated with this chapter will also be deleted.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="handleDelete('chapter', {{ chapter.id }})">Delete Chapter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Quiz Modal -->
+    <div class="modal fade" id="deleteQuizModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Quiz</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this quiz? This action cannot be undone.</p>
+                    <p class="text-danger"><strong>Warning:</strong> All questions and scores associated with this quiz will also be deleted.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteQuizBtn">Delete Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const searchText = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('.searchable tr');
+                
+                rows.forEach(function(row) {
+                    const dateCell = row.querySelector('td:nth-child(1)');
+                    const remarksCell = row.querySelector('td:nth-child(4)');
+                    
+                    if (dateCell && remarksCell) {
+                        const date = dateCell.textContent.toLowerCase();
+                        const remarks = remarksCell.textContent.toLowerCase();
+                        
+                        if (date.includes(searchText) || remarks.includes(searchText)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        }
+
+        function handleQuizDelete(quizId) {
+            const modal = new bootstrap.Modal(document.getElementById('deleteQuizModal'));
+            if (!modal) return;
+            
+            modal.show();
+            const confirmBtn = document.getElementById('confirmDeleteQuizBtn');
+            
+            if (confirmBtn) {
+                confirmBtn.onclick = function() {
+                    fetch('/admin/quiz/' + quizId + '/delete', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function(response) { return response.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + (data.error || 'Failed to delete quiz'));
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the quiz.');
+                    });
+
+                    modal.hide();
+                };
+            }
+        }
+
+        function handleDelete(type, id) {
+            const url = type === 'chapter' 
+                ? "{{ url_for('delete_chapter', chapter_id=chapter.id) }}"
+                : `{{ url_for('delete_quiz', quiz_id=0) }}`.replace('0', id);
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (type === 'chapter') {
+                        window.location.href = "{{ url_for('admin_dashboard') }}";
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to delete chapter'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting.');
+            });
+
+            // Close any open modals
+            const modal = bootstrap.Modal.getInstance(document.querySelector('.modal.show'));
+            if (modal) {
+                modal.hide();
+            }
+        }
+    </script>
+</body>
+</html> 

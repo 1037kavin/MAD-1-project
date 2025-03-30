@@ -1,0 +1,331 @@
+/* Basic reset and fonts */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* General Styles */
+body {
+    font-family: 'Open Sans', sans-serif;
+    line-height: 1.6;
+    background-color: #f7f7f7;
+    color: #333;
+}
+
+/* Navigation */
+.navbar {
+    background-color: #666666 !important;
+    padding: 12px 0;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    padding: 8px 15px !important;
+}
+
+.nav-link:hover {
+    color: white !important;
+}
+
+/* Cards */
+.card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: #f5f5f5 !important;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 12px 15px;
+}
+
+.card-body {
+    padding: 18px;
+}
+
+/* Buttons */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #666666 !important;
+    border-color: #666666 !important;
+    color: white !important;
+}
+
+.btn-primary:hover {
+    background-color: #555555 !important;
+    border-color: #555555 !important;
+}
+
+.btn-success {
+    background-color: #777777 !important;
+    border-color: #777777 !important;
+    color: white !important;
+}
+
+.btn-success:hover {
+    background-color: #666666 !important;
+    border-color: #666666 !important;
+}
+
+.btn-danger {
+    background-color: #888888 !important;
+    border-color: #888888 !important;
+    color: white !important;
+}
+
+.btn-danger:hover {
+    background-color: #777777 !important;
+    border-color: #777777 !important;
+}
+
+.btn-info {
+    background-color: #707070 !important;
+    border-color: #707070 !important;
+    color: white !important;
+}
+
+.btn-info:hover {
+    background-color: #606060 !important;
+    border-color: #606060 !important;
+}
+
+.btn-secondary {
+    background-color: #999999 !important;
+    border-color: #999999 !important;
+    color: white !important;
+}
+
+.btn-secondary:hover {
+    background-color: #888888 !important;
+    border-color: #888888 !important;
+}
+
+.btn-warning {
+    background-color: #808080 !important;
+    border-color: #808080 !important;
+    color: white !important;
+}
+
+.btn-warning:hover {
+    background-color: #707070 !important;
+    border-color: #707070 !important;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+}
+
+/* Forms */
+.form-control {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+.form-control:focus {
+    border-color: #666666;
+    box-shadow: 0 0 0 0.2rem rgba(102, 102, 102, 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.input-group-text {
+    background-color: #f5f5f5;
+    border-color: #e0e0e0;
+    color: #666;
+}
+
+/* Tables */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    background-color: #f5f5f5;
+    color: #333;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table td {
+    padding: 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #eee;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f8f8;
+}
+
+/* Alerts */
+.alert {
+    border: none;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.alert-info {
+    background-color: #cff4fc;
+    color: #055160;
+}
+
+.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* Stats Cards */
+.stats-card {
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease;
+    margin-bottom: 1rem;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.stats-number {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.stats-label {
+    font-size: 1rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Quiz Styles */
+.quiz-timer {
+    font-size: 18px;
+    color: #e74c3c;
+    margin: 15px 0;
+}
+
+.question-box {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.option-list {
+    list-style: none;
+    padding: 0;
+}
+
+.option-item {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.option-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Modals */
+.modal-content {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.modal-header {
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 1.5rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    background-color: #f5f5f5;
+    border-top: 1px solid #e0e0e0;
+    padding: 1.5rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .card {
+        margin: 10px 0;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .table-responsive {
+        margin-bottom: 1rem;
+        border: 0;
+    }
+} 

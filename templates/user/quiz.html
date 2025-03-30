@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Quiz - Quiz Master</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <style>
+        #timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        .question-card {
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">Quiz Master</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('user_dashboard') }}">Dashboard</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="ms-auto">
+                <div class="text-white">
+                    Time Remaining: <span id="timer">{{ quiz.time_duration }}</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">{{ quiz.chapter.subject.name }} - {{ quiz.chapter.name }}</h3>
+                <p class="text-muted mb-0">Date: {{ quiz.date_of_quiz.strftime('%Y-%m-%d') }} | Duration: {{ quiz.time_duration }}</p>
+            </div>
+            <div class="card-body">
+                <form id="quizForm" method="POST" action="{{ url_for('submit_quiz', quiz_id=quiz.id) }}" data-total-questions="{{ questions|length }}">
+                    <div class="alert alert-warning" id="warningAlert" style="display: none;">
+                        Warning: You haven't answered all questions. Unanswered questions will be marked as wrong. Do you want to proceed?
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-danger" id="proceedSubmit">Yes, Submit Anyway</button>
+                            <button type="button" class="btn btn-secondary" id="cancelSubmit">No, Continue Quiz</button>
+                        </div>
+                    </div>
+
+                    {% for question in questions %}
+                    <div class="question-card card">
+                        <div class="card-body">
+                            <h5 class="card-title">Question {{ loop.index }} of {{ questions|length }}</h5>
+                            <p class="card-text">{{ question.question_statement }}</p>
+                            <div class="options">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="1" required>
+                                    <label class="form-check-label">{{ question.option1 }}</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="2">
+                                    <label class="form-check-label">{{ question.option2 }}</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="3">
+                                    <label class="form-check-label">{{ question.option3 }}</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="4">
+                                    <label class="form-check-label">{{ question.option4 }}</label>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                {% if questions|length == 1 %}
+                                    <button type="submit" class="btn btn-primary">Submit Quiz</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% if questions|length > 1 %}
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Submit Quiz</button>
+                        <a href="{{ url_for('user_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Parse the quiz duration (MM:SS format)
+        const duration = "{{ quiz.time_duration }}";
+        const [minutes, seconds] = duration.split(':').map(Number);
+        let totalSeconds = minutes * 60 + seconds;
+        
+        function updateTimer() {
+            const mins = Math.floor(totalSeconds / 60);
+            const secs = totalSeconds % 60;
+            document.getElementById('timer').textContent = 
+                `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            
+            if (totalSeconds <= 0) {
+                document.getElementById('quizForm').submit();
+            } else {
+                totalSeconds--;
+            }
+        }
+        
+        // Update timer every second
+        updateTimer();
+        const timerInterval = setInterval(updateTimer, 1000);
+        
+        // Submit form when timer reaches zero
+        setTimeout(() => {
+            clearInterval(timerInterval);
+            document.getElementById('quizForm').submit();
+        }, (totalSeconds + 1) * 1000);
+
+        // Handle quiz submission
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const form = document.getElementById('quizForm');
+            const totalQuestions = parseInt(form.getAttribute('data-total-questions'));
+            const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
+            
+            if (answeredQuestions < totalQuestions) {
+                // Show warning if not all questions are answered
+                document.getElementById('warningAlert').style.display = 'block';
+                window.scrollTo(0, 0); // Scroll to top to show warning
+            } else {
+                // If all questions are answered, submit directly
+                form.submit();
+            }
+        });
+
+        // Handle proceed with partial submission
+        document.getElementById('proceedSubmit').addEventListener('click', function() {
+            document.getElementById('quizForm').submit();
+        });
+
+        // Handle cancel partial submission
+        document.getElementById('cancelSubmit').addEventListener('click', function() {
+            document.getElementById('warningAlert').style.display = 'none';
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

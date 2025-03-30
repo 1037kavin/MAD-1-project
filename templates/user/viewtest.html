@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Details - Quiz Master</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">Quiz Master</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('user_dashboard') }}">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('user_summary') }}">Summary</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">{{ quiz.chapter.subject.name }} - {{ quiz.chapter.name }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Quiz Details</h5>
+                        <table class="table">
+                            <tr>
+                                <th>Date:</th>
+                                <td>{{ quiz.date_of_quiz.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                            <tr>
+                                <th>Duration:</th>
+                                <td>{{ quiz.time_duration }}</td>
+                            </tr>
+                            <tr>
+                                <th>Number of Questions:</th>
+                                <td>{{ questions|length }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td>
+                                    {% if quiz.date_of_quiz > now %}
+                                        <span class="badge bg-success">Upcoming</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Past</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Your Performance</h5>
+                        {% if score %}
+                        <table class="table">
+                            <tr>
+                                <th>Score:</th>
+                                <td>{{ "%.1f"|format(score.total_scored) }}%</td>
+                            </tr>
+                            <tr>
+                                <th>Time Taken:</th>
+                                <td>{{ score.time_taken }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date Taken:</th>
+                                <td>{{ score.time_stamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                        </table>
+                        {% else %}
+                        <p class="text-muted">You haven't taken this quiz yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if quiz.remarks %}
+                <div class="mt-4">
+                    <h5>Remarks</h5>
+                    <p>{{ quiz.remarks }}</p>
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    {% if quiz.date_of_quiz > now %}
+                        <a href="{{ url_for('take_quiz', quiz_id=quiz.id) }}" class="btn btn-primary">Start Quiz</a>
+                    {% elif not score %}
+                        <a href="{{ url_for('take_quiz', quiz_id=quiz.id) }}" class="btn btn-primary">Take Quiz</a>
+                    {% endif %}
+                    <a href="{{ url_for('user_dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

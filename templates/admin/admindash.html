@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Quiz Master</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">Quiz Master</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin_summary') }}">Summary</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('user_management') }}">User Management</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('user_dashboard') }}">Dashboard</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Admin Dashboard</h2>
+        
+        <!-- Search Bar -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search subjects or chapters...">
+                </div>
+            </div>
+        </div>
+        
+        {% for subject in subjects %}
+        <div class="card mb-4 subject-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">{{ subject.name }}</h3>
+                <div>
+                    <a href="{{ url_for('add_chapter', subject_id=subject.id) }}" class="btn btn-sm btn-success me-2">
+                        <i class="fas fa-plus"></i> Add Chapter
+                    </a>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="handleSubjectDelete({{ subject.id }})">
+                        <i class="fas fa-trash"></i> Delete Subject
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Chapter</th>
+                                <th>No. of Quizzes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for chapter in subject.chapters %}
+                            <tr>
+                                <td>{{ chapter.name }}</td>
+                                <td>
+                                    {% if chapter.quizzes %}
+                                        {{ chapter.quizzes|length }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('chapter_management', chapter_id=chapter.id) }}" class="btn btn-sm btn-primary me-2">
+                                        <i class="fas fa-cogs"></i> Manage
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="handleChapterDelete({{ chapter.id }})">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="d-grid gap-2">
+            <a href="{{ url_for('add_subject') }}" class="btn btn-primary">Add New Subject</a>
+        </div>
+    </div>
+
+    <!-- Delete Subject Modal -->
+    <div class="modal fade" id="deleteSubjectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Subject</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this subject? This action cannot be undone.</p>
+                    <p class="text-danger"><strong>Warning:</strong> All chapters, quizzes, and questions associated with this subject will also be deleted.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteSubjectBtn">Delete Subject</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Chapter Modal -->
+    <div class="modal fade" id="deleteChapterModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Chapter</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this chapter? This action cannot be undone.</p>
+                    <p class="text-danger"><strong>Warning:</strong> All quizzes and questions associated with this chapter will also be deleted.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteChapterBtn">Delete Chapter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const searchText = e.target.value.toLowerCase();
+                const subjectCards = document.querySelectorAll('.subject-card');
+                
+                subjectCards.forEach(function(card) {
+                    const header = card.querySelector('.card-header h3');
+                    const chapterRows = card.querySelectorAll('tbody tr');
+                    let subjectVisible = false;
+                    
+                    if (header) {
+                        const subjectName = header.textContent ? header.textContent.toLowerCase() : '';
+                        
+                        // Search in chapters
+                        chapterRows.forEach(function(row) {
+                            const chapterCell = row.querySelector('td:first-child');
+                            const chapterName = chapterCell ? chapterCell.textContent.toLowerCase() : '';
+                            
+                            if (chapterName.includes(searchText) || subjectName.includes(searchText)) {
+                                row.style.display = '';
+                                subjectVisible = true;
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                        
+                        // Show/hide subject card
+                        card.style.display = subjectVisible || subjectName.includes(searchText) ? '' : 'none';
+                    }
+                });
+            });
+        }
+
+        function handleSubjectDelete(subjectId) {
+            const modal = new bootstrap.Modal(document.getElementById('deleteSubjectModal'));
+            modal.show();
+
+            const confirmBtn = document.getElementById('confirmDeleteSubjectBtn');
+            if (confirmBtn) {
+                confirmBtn.onclick = function() {
+                    fetch('/admin/subject/' + subjectId + '/delete', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function(response) { return response.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + (data.error || 'Failed to delete subject'));
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the subject.');
+                    });
+
+                    modal.hide();
+                };
+            }
+        }
+
+        function handleChapterDelete(chapterId) {
+            const modal = new bootstrap.Modal(document.getElementById('deleteChapterModal'));
+            modal.show();
+
+            const confirmBtn = document.getElementById('confirmDeleteChapterBtn');
+            if (confirmBtn) {
+                confirmBtn.onclick = function() {
+                    fetch('/admin/chapter/' + chapterId + '/delete', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function(response) { return response.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + (data.error || 'Failed to delete chapter'));
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the chapter.');
+                    });
+
+                    modal.hide();
+                };
+            }
+        }
+    </script>
+</body>
+</html> 
